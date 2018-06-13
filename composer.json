@@ -1,0 +1,15 @@
+{
+    "name": "ciebit/places",
+    "description": "Biblioteca com abertura para comunicação com várias APIs afim de fornecer uma listagem de cidades, estados e países.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Maike",
+            "email": "maike_jbe@hotmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"Ciebit\\": "app"}
+    },
+    "require": {}
+}
