@@ -3,6 +3,7 @@ namespace Ciebit\Places\Collections;
 
 use ArrayObject;
 use ArrayIterator;
+use Ciebit\Places\State;
 
 class States
 {
@@ -16,11 +17,12 @@ class States
     public function add(State $state): self
     {
         $this->States->append($state);
+        return $this;
     }
 
     public function getArrayIterator(): ArrayIterator
     {
-        $this->States->getIterator();
+        return $this->States->getIterator();
     }
 
     public function getArrayObject(): ArrayObject

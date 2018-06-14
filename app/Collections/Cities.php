@@ -3,6 +3,7 @@ namespace Ciebit\Places\Collections;
 
 use ArrayObject;
 use ArrayIterator;
+use Ciebit\Places\City;
 
 class Cities
 {
@@ -16,11 +17,12 @@ class Cities
     public function add(City $city): self
     {
         $this->Cities->append($city);
+        return $this;
     }
 
     public function getArrayIterator(): ArrayIterator
     {
-        $this->Cities->getIterator();
+        return $this->Cities->getIterator();
     }
 
     public function getArrayObject(): ArrayObject

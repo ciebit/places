@@ -3,6 +3,7 @@ namespace Ciebit\Places\Collections;
 
 use ArrayObject;
 use ArrayIterator;
+use Ciebit\Places\Country;
 
 class Countries
 {
@@ -16,11 +17,12 @@ class Countries
     public function add(Country $country): self
     {
         $this->Countries->append($country);
+        return $this;
     }
 
     public function getArrayIterator(): ArrayIterator
     {
-        $this->Countries->getIterator();
+        return $this->Countries->getIterator();
     }
 
     public function getArrayObject(): ArrayObject
