@@ -1,7 +1,11 @@
 <?php
 namespace Ciebit\Places;
 
-use Ciebit\Places\Repositories\IBGE\Repository as IBGERepository;
+use Ciebit\Places\Repositories\Repositories;
+use Ciebit\Places\Repositories\Cities as CitiesRepository;
+use Ciebit\Places\Repositories\States as StatesRepository;
+use Ciebit\Places\Repositories\Countries as CountriesRepository;
+use Ciebit\Places\Repositories\IBGE\Repositories as IBGERepository;
 
 class Places
 {
@@ -54,45 +58,29 @@ class Places
         return $Countries->get();
     }
 
-    private function applyCitiesFilters(Repository $Repository)
+    private function applyCitiesFilters(CitiesRepository $Repository)
     {
-        if ($this->filters[CITY_ID])
-            {$Repository->setFilterId($this->filters[CITY_ID]);}
-
-        if ($this->filters[CITY_NAME])
-            {$Repository->setFilterName($this->filters[CITY_NAME]);}
-
-        if ($this->filters[STATE_ID])
-            {$Repository->setFilterStateId($this->filters[STATE_ID]);}
-
-        if ($this->filters[STATE_NAME])
-            {$Repository->setFilterStateName($this->filters[STATE_NAME]);}
-
-        if ($this->filters[STATE_ABBREVIATION])
-            {$Repository->setFilterStateAbbreviation($this->filters[STATE_ABBREVIATION]);}
+        $Repository
+        ->setFilterId($this->filters[self::CITY_ID] ?? 0)
+        ->setFilterName($this->filters[self::CITY_NAME] ?? '')
+        ->setFilterStateId($this->filters[self::STATE_ID] ?? 0)
+        ->setFilterStateName($this->filters[self::STATE_NAME] ?? '')
+        ->setFilterStateAbbreviation($this->filters[self::STATE_ABBREVIATION] ?? '');
     }
 
-    private function applyStatesFilters(Repository $Repository)
+    private function applyStatesFilters(StatesRepository $Repository)
     {
-        if ($this->filters[STATE_ID])
-            {$Repository->setFilterId($this->filters[STATE_ID]);}
-
-        if ($this->filters[STATE_NAME])
-            {$Repository->setFilterName($this->filters[STATE_NAME]);}
-
-        if ($this->filters[STATE_ABBREVIATION])
-            {$Repository->setFilterAbbreviation($this->filters[STATE_ABBREVIATION]);}
+        $Repository
+        ->setFilterId($this->filters[self::STATE_ID])
+        ->setFilterName($this->filters[self::STATE_NAME])
+        ->setFilterAbbreviation($this->filters[self::STATE_ABBREVIATION]);
     }
 
-    private function applyCountriesFilters(Repository $Repository)
+    private function applyCountriesFilters(CountriesRepository $Repository)
     {
-        if ($this->filters[COUNTRY_ID])
-            {$Repository->setFilterId($this->filters[COUNTRY_ID]);}
-
-        if ($this->filters[COUNTRY_NAME])
-            {$Repository->setFilterName($this->filters[COUNTRY_NAME]);}
-
-        if ($this->filters[COUNTRY_ABBREVIATION])
-            {$Repository->setFilterAbbreviation($this->filters[COUNTRY_ABBREVIATION]);}
+        $Repository
+        ->setFilterId($this->filters[self::COUNTRY_ID])
+        ->setFilterName($this->filters[self::COUNTRY_NAME])
+        ->setFilterAbbreviation($this->filters[self::COUNTRY_ABBREVIATION]);
     }
 }
