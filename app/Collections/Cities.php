@@ -1,6 +1,9 @@
 <?php
 namespace Ciebit\Places\Collections;
 
+use ArrayObject;
+use ArrayIterator;
+
 class Cities
 {
     private $Cities; #ArrayObject
