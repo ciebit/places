@@ -17,7 +17,7 @@ class Cities
 
     public function getArrayIterator(): ArrayIterator
     {
-        $this->Cities->getIterator;
+        $this->Cities->getIterator();
     }
 
     public function getArrayObject(): ArrayObject
