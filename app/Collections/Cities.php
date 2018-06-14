@@ -22,8 +22,7 @@ class Cities
 
     public function getArrayObject(): ArrayObject
     {
-        $clone = $this->Cities;
-        return $clone;
+        return clone $this->Cities;
     }
 
     public function total(): int
