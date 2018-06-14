@@ -6,6 +6,9 @@ use Ciebit\Places\Repositories\Cities as CitiesRepository;
 use Ciebit\Places\Repositories\States as StatesRepository;
 use Ciebit\Places\Repositories\Countries as CountriesRepository;
 use Ciebit\Places\Repositories\IBGE\Repositories as IBGERepository;
+use Ciebit\Places\Collections\Cities as CitiesCollection;
+use Ciebit\Places\Collections\States as StatesCollection;
+use Ciebit\Places\Collections\Countries as CountriesCollection;
 
 class Places
 {
