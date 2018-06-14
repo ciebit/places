@@ -17,7 +17,7 @@ class Places
     public const STATE_ID = 'state-id';
     public const STATE_ABBREVIATION = 'state-abbreviation';
     public const STATE_NAME = 'state-name';
-    public const TOTAL = null; #string
+    public const TOTAL = 'total';
 
     private $Repository; #Repositories
     private $filters; #array
@@ -65,22 +65,25 @@ class Places
         ->setFilterName($this->filters[self::CITY_NAME] ?? '')
         ->setFilterStateId($this->filters[self::STATE_ID] ?? 0)
         ->setFilterStateName($this->filters[self::STATE_NAME] ?? '')
-        ->setFilterStateAbbreviation($this->filters[self::STATE_ABBREVIATION] ?? '');
+        ->setFilterStateAbbreviation($this->filters[self::STATE_ABBREVIATION] ?? '')
+        ->setTotal($this->filters[self::TOTAL] ?? 0);
     }
 
     private function applyStatesFilters(StatesRepository $Repository)
     {
         $Repository
-        ->setFilterId($this->filters[self::STATE_ID])
-        ->setFilterName($this->filters[self::STATE_NAME])
-        ->setFilterAbbreviation($this->filters[self::STATE_ABBREVIATION]);
+        ->setFilterId($this->filters[self::STATE_ID] ?? 0)
+        ->setFilterName($this->filters[self::STATE_NAME] ?? '')
+        ->setFilterAbbreviation($this->filters[self::STATE_ABBREVIATION] ?? '')
+        ->setTotal($this->filters[self::TOTAL] ?? 0);
     }
 
     private function applyCountriesFilters(CountriesRepository $Repository)
     {
         $Repository
-        ->setFilterId($this->filters[self::COUNTRY_ID])
-        ->setFilterName($this->filters[self::COUNTRY_NAME])
-        ->setFilterAbbreviation($this->filters[self::COUNTRY_ABBREVIATION]);
+        ->setFilterId($this->filters[self::COUNTRY_ID] ?? 0)
+        ->setFilterName($this->filters[self::COUNTRY_NAME] ?? '')
+        ->setFilterAbbreviation($this->filters[self::COUNTRY_ABBREVIATION] ?? '')
+        ->setTotal($this->filters[self::TOTAL] ?? 0);
     }
 }
