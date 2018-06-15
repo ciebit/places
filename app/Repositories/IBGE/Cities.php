@@ -19,10 +19,12 @@ class Cities implements ICities
 
     private $Cities; #CitiesCollection
     private $States; #StatesRepository
+    private $endpointPrefix; #string
 
     public function __construct(StatesRepository $states)
     {
         $this->States = $states;
+        $this->endpointPrefix = "https://servicodados.ibge.gov.br/api/v1/localidades/";
     }
 
     public function get(): CitiesCollection
@@ -98,29 +100,33 @@ class Cities implements ICities
 
     private function getAll(): array
     {
-        $data = json_decode(file_get_contents("https://servicodados.ibge.gov.br/api/v1/localidades/municipios"));
+        $data = json_decode(file_get_contents("{$this->endpointPrefix}municipios"));
         return $data;
     }
 
-    private function applyFilterById(): CitiesCollection
+    private function applyFilterById(): ?CitiesCollection
     {
-        $data = json_decode(file_get_contents("https://servicodados.ibge.gov.br/api/v1/localidades/municipios/{$this->filterId}"));
+        $data = json_decode(file_get_contents("{$this->endpointPrefix}municipios/{$this->filterId}"));
 
-        $State = new State(
-            $data->microrregiao->mesorregiao->UF->nome,
-            $data->microrregiao->mesorregiao->UF->id,
-            $data->microrregiao->mesorregiao->UF->sigla,
-            new Country("Brasil", 0, "BR")
-        );
-        $City = new City(
-            $data->nome,
-            $data->id,
-            $State
-        );
-        return $this->Cities->add($City);
+        if ($data) {
+            $State = new State(
+                $data->microrregiao->mesorregiao->UF->nome,
+                $data->microrregiao->mesorregiao->UF->id,
+                $data->microrregiao->mesorregiao->UF->sigla,
+                new Country("Brasil", 0, "BR")
+            );
+            $City = new City(
+                $data->nome,
+                $data->id,
+                $State
+            );
+            return $this->Cities->add($City);
+        } else {
+            return null;
+        }
     }
 
-    private function applyFilterByName($data): array
+    private function applyFilterByName(array $data): array
     {
         $data = array_filter($data, function($city) {
             return $city->nome === $this->filterName;
@@ -131,34 +137,39 @@ class Cities implements ICities
 
     private function applyFilterByStateId(): array
     {
-        $data = json_decode(file_get_contents("https://servicodados.ibge.gov.br/api/v1/localidades/estados/{$this->filterStateId}/municipios"));
-
+        $data = json_decode(file_get_contents("{$this->endpointPrefix}estados/{$this->filterStateId}/municipios"));
         return $data;
     }
 
-    private function applyFilterByStateAbbreviation($states): array
+    private function applyFilterByStateAbbreviation(array $states): ?array
     {
         $state = array_filter($states, function($state) {
             return $state->sigla === $this->filterStateAbbreviation;
         });
-        $state = array_merge(array(), $state);
-        $data = json_decode(file_get_contents("https://servicodados.ibge.gov.br/api/v1/localidades/estados/{$state[0]->id}/municipios"));
+        sort($state);
 
-        return $data;
+        if ($state[0]) {
+            $data = json_decode(file_get_contents("{$this->endpointPrefix}estados/{$state[0]->id}/municipios"));
+            return $data;
+        }
+        return null;
     }
 
-    private function applyFilterByStateName($states): array
+    private function applyFilterByStateName(array $states): ?array
     {
         $state = array_filter($states, function($state) {
             return $state->nome === $this->filterStateName;
         });
-        $state = array_merge(array(), $state);
-        $data = json_decode(file_get_contents("https://servicodados.ibge.gov.br/api/v1/localidades/estados/{$state[0]->id}/municipios"));
+        sort($state);
 
-        return $data;
+        if ($state[0]) {
+            $data = json_decode(file_get_contents("{$this->endpointPrefix}estados/{$state[0]->id}/municipios"));
+            return $data;
+        }
+        return null;
     }
 
-    private function arrayToCollection($data): CitiesCollection
+    private function arrayToCollection(array $data): CitiesCollection
     {
         foreach ($data as $item) {
             $State = new State(
