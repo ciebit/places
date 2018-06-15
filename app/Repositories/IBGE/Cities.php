@@ -6,6 +6,7 @@ use Ciebit\Places\Collections\Cities as CitiesCollection;
 use Ciebit\Places\City;
 use Ciebit\Places\State;
 use Ciebit\Places\Country;
+use Ciebit\Places\Repositories\IBGE\States as StatesRepository;
 
 class Cities implements ICities
 {
@@ -17,6 +18,12 @@ class Cities implements ICities
     private $total;
 
     private $Cities; #CitiesCollection
+    private $States; #StatesRepository
+
+    public function __construct(StatesRepository $states)
+    {
+        $this->States = $states;
+    }
 
     public function get(): CitiesCollection
     {
@@ -66,22 +73,27 @@ class Cities implements ICities
         if ($this->filterId) {
             return $this->applyFilterById();
         } else {
-            if ($this->filterStateId) {
-                $result = $this->applyFilterByStateId();
-            } else {
-                $result = $this->getAll();
-            }
-            if ($this->filterStateAbbreviation) {
-                $result = $this->applyFilterByStateAbbreviation($result);
-            }
-            if ($this->filterStateName) {
-                $result = $this->applyFilterByStateName($result);
-            }
+            $result = $this->getState();
             if ($this->filterName) {
-                $result = $this->applyFilterByName($result);
+                $result = $this->applyFilterByName($result ?? $this->getAll());
             }
             return $this->arrayToCollection($result);
         }
+    }
+
+    private function getState(): ?array
+    {
+        $result = null;
+        if ($this->filterStateId) {
+            $result = $this->applyFilterByStateId();
+        } else if ($this->filterStateAbbreviation) {
+            $result = $this->States->getAll();
+            $result = $this->applyFilterByStateAbbreviation($result);
+        } else if ($this->filterStateName) {
+            $result = $this->States->getAll();
+            $result = $this->applyFilterByStateName($result);
+        }
+        return $result;
     }
 
     private function getAll(): array
@@ -124,20 +136,24 @@ class Cities implements ICities
         return $data;
     }
 
-    private function applyFilterByStateAbbreviation($data): array
+    private function applyFilterByStateAbbreviation($states): array
     {
-        $data = array_filter($data, function($city) {
-            return $city->microrregiao->mesorregiao->UF->sigla === $this->filterStateAbbreviation;
+        $state = array_filter($states, function($state) {
+            return $state->sigla === $this->filterStateAbbreviation;
         });
+        $state = array_merge(array(), $state);
+        $data = json_decode(file_get_contents("https://servicodados.ibge.gov.br/api/v1/localidades/estados/{$state[0]->id}/municipios"));
 
         return $data;
     }
 
-    private function applyFilterByStateName($data): array
+    private function applyFilterByStateName($states): array
     {
-        $data = array_filter($data, function($city) {
-            return $city->microrregiao->mesorregiao->UF->nome === $this->filterStateName;
+        $state = array_filter($states, function($state) {
+            return $state->nome === $this->filterStateName;
         });
+        $state = array_merge(array(), $state);
+        $data = json_decode(file_get_contents("https://servicodados.ibge.gov.br/api/v1/localidades/estados/{$state[0]->id}/municipios"));
 
         return $data;
     }
