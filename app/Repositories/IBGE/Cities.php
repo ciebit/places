@@ -16,6 +16,7 @@ class Cities implements ICities
     private $filterStateAbbreviation;
     private $filterStateName;
     private $total;
+    private $flag_identical;
 
     private $Cities; #CitiesCollection
     private $States; #StatesRepository
@@ -43,6 +44,7 @@ class Cities implements ICities
     public function setFilterName(string $name, bool $identical = true): ICities
     {
         $this->filterName = $name;
+        $this->flag_identical = $identical;
         return $this;
     }
 
@@ -127,9 +129,17 @@ class Cities implements ICities
 
     private function applyFilterByName(array $data): ?array
     {
-        $data = array_filter($data, function($city) {
-            return $city->nome === $this->filterName;
-        });
+        if ($this->flag_identical) {
+            $data = array_filter($data, function($city) {
+                return $city->nome === $this->filterName;
+            });
+        } else {
+            $data = array_filter($data, function($city) {
+                $cityLowerCase = strtolower($city->nome);
+                $filterLowerCase = strtolower($this->filterName);
+                return preg_match("/^{$filterLowerCase}/", $cityLowerCase);
+            });
+        }
         if ($data) {
             return $data;
         }
