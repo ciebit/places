@@ -72,8 +72,19 @@ class Cities implements ICities
 
     private function fetch(): CitiesCollection
     {
+        $result = $this->getState();
         if ($this->filterId) {
-            return $this->applyFilterById();
+            $city = $this->applyFilterById();
+            if ($result) {
+                if ($result[0]->microrregiao->mesorregiao->UF->nome
+                === $city[0]->microrregiao->mesorregiao->UF->nome) {
+                    return $this->arrayToCollection($city);
+                } else {
+                    return new CitiesCollection;
+                }
+            } else {
+                return $this->arrayToCollection($city);
+            }
         } else {
             $result = $this->getState();
             if ($this->filterName) {
@@ -104,41 +115,34 @@ class Cities implements ICities
         return $data;
     }
 
-    private function applyFilterById(): ?CitiesCollection
+    private function applyFilterById(): ?array
     {
         $data = json_decode(file_get_contents("{$this->endpointPrefix}municipios/{$this->filterId}"));
-
         if ($data) {
-            $State = new State(
-                $data->microrregiao->mesorregiao->UF->nome,
-                $data->microrregiao->mesorregiao->UF->id,
-                $data->microrregiao->mesorregiao->UF->sigla,
-                new Country("Brasil", 0, "BR")
-            );
-            $City = new City(
-                $data->nome,
-                $data->id,
-                $State
-            );
-            return $this->Cities->add($City);
-        } else {
-            return null;
+            $array[] = $data;
+            return $array;
         }
+        return null;
     }
 
-    private function applyFilterByName(array $data): array
+    private function applyFilterByName(array $data): ?array
     {
         $data = array_filter($data, function($city) {
             return $city->nome === $this->filterName;
         });
-
-        return $data;
+        if ($data) {
+            return $data;
+        }
+        return null;
     }
 
-    private function applyFilterByStateId(): array
+    private function applyFilterByStateId(): ?array
     {
         $data = json_decode(file_get_contents("{$this->endpointPrefix}estados/{$this->filterStateId}/municipios"));
-        return $data;
+        if ($data) {
+            return $data;
+        }
+        return null;
     }
 
     private function applyFilterByStateAbbreviation(array $states): ?array
