@@ -1,6 +1,8 @@
 <?php
 namespace Ciebit\Places\Repositories;
 
+use Ciebit\Places\Collections\Cities as CitiesCollection;
+
 interface Cities
 {
     public function get(): CitiesCollection;

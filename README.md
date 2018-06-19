@@ -11,7 +11,7 @@ No exemplo abaixo é obtido e impresso a lista de cidades do estado do Ceará/Br
 use Ciebit/Places/Places;
 
 $places = new Places;
-$cities = $places->addFilter(Places::COUNTRY_ID, 76)->addFilter(Places::STATE_NAME, 'Ceará')->getCities()->getIterator();
+$cities = $places->addFilter(Places::COUNTRY_ID, 76)->addFilter(Places::STATE_NAME, 'Ceará')->getCities()->getArrayIterator();
 while ($cities->valid()) {
     echo $cities->current()->getName()."\n";
     $cities->next();

@@ -3,35 +3,35 @@ namespace Ciebit\Places\Collections;
 
 use ArrayObject;
 use ArrayIterator;
-use Ciebit\Places\City;
+use Ciebit\Places\State;
 
-class Cities
+class States
 {
-    private $Cities; #ArrayObject
+    private $States; #ArrayObject
 
     public function __construct()
     {
-        $this->Cities = new ArrayObject;
+        $this->States = new ArrayObject;
     }
 
-    public function add(City $city): self
+    public function add(State $state): self
     {
-        $this->Cities->append($city);
+        $this->States->append($state);
         return $this;
     }
 
     public function getArrayIterator(): ArrayIterator
     {
-        return $this->Cities->getIterator();
+        return $this->States->getIterator();
     }
 
     public function getArrayObject(): ArrayObject
     {
-        return clone $this->Cities;
+        return clone $this->States;
     }
 
     public function total(): int
     {
-        return $this->Cities->count();
+        return $this->States->count();
     }
 }
