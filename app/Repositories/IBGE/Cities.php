@@ -30,8 +30,6 @@ class Cities implements ICities
 
     public function get(): CitiesCollection
     {
-        $this->Cities = new CitiesCollection;
-
         return $this->fetch();
     }
 
@@ -74,41 +72,25 @@ class Cities implements ICities
 
     private function fetch(): CitiesCollection
     {
-        $result = $this->getState();
         if ($this->filterId) {
-            $city = $this->applyFilterById();
-            if ($result) {
-                if ($result[0]->microrregiao->mesorregiao->UF->nome
-                === $city[0]->microrregiao->mesorregiao->UF->nome) {
-                    return $this->arrayToCollection($city);
-                } else {
-                    return new CitiesCollection;
-                }
-            } else {
-                return $this->arrayToCollection($city);
-            }
+            $cities = $this->getById($this->filterId);
+        } elseif ($this->filterStateId) {
+            $cities = $this->getByStateId($this->filterStateId);
+        } elseif ($this->filterStateAbbreviation) {
+            $cities = $this->getByStateAbbreviation();
+        } elseif ($this->filterStateName) {
+            $cities = $this->getByStateName();
         } else {
-            $result = $this->getState();
-            if ($this->filterName) {
-                $result = $this->applyFilterByName($result ?? $this->getAll());
-            }
-            return $this->arrayToCollection($result);
+            $cities = $this->getAll();
         }
-    }
 
-    private function getState(): ?array
-    {
-        $result = null;
-        if ($this->filterStateId) {
-            $result = $this->applyFilterByStateId();
-        } else if ($this->filterStateAbbreviation) {
-            $result = $this->States->getAll();
-            $result = $this->applyFilterByStateAbbreviation($result);
-        } else if ($this->filterStateName) {
-            $result = $this->States->getAll();
-            $result = $this->applyFilterByStateName($result);
-        }
-        return $result;
+        $cities = $this->filterById($cities);
+        $cities = $this->filterByStateId($cities);
+        $cities = $this->filterByStateAbbreviation($cities);
+        $cities = $this->filterByStateName($cities);
+        $cities = $this->filterByName($cities);
+
+        return $this->arrayToCollection($cities);
     }
 
     private function getAll(): array
@@ -117,9 +99,9 @@ class Cities implements ICities
         return $data;
     }
 
-    private function applyFilterById(): ?array
+    private function getById(int $id): ?array
     {
-        $data = json_decode(file_get_contents("{$this->endpointPrefix}municipios/{$this->filterId}"));
+        $data = json_decode(file_get_contents("{$this->endpointPrefix}municipios/{$id}"));
         if ($data) {
             $array[] = $data;
             return $array;
@@ -127,36 +109,18 @@ class Cities implements ICities
         return null;
     }
 
-    private function applyFilterByName(array $data): ?array
+    private function getByStateId(int $id): ?array
     {
-        if ($this->flag_identical) {
-            $data = array_filter($data, function($city) {
-                return $city->nome === $this->filterName;
-            });
-        } else {
-            $data = array_filter($data, function($city) {
-                $cityLowerCase = strtolower($city->nome);
-                $filterLowerCase = strtolower($this->filterName);
-                return preg_match("/^{$filterLowerCase}/", $cityLowerCase);
-            });
-        }
+        $data = json_decode(file_get_contents("{$this->endpointPrefix}estados/{$id}/municipios"));
         if ($data) {
             return $data;
         }
         return null;
     }
 
-    private function applyFilterByStateId(): ?array
+    private function getByStateAbbreviation(): ?array
     {
-        $data = json_decode(file_get_contents("{$this->endpointPrefix}estados/{$this->filterStateId}/municipios"));
-        if ($data) {
-            return $data;
-        }
-        return null;
-    }
-
-    private function applyFilterByStateAbbreviation(array $states): ?array
-    {
+        $states = $this->States->getAll();
         $state = array_filter($states, function($state) {
             return $state->sigla === $this->filterStateAbbreviation;
         });
@@ -169,8 +133,9 @@ class Cities implements ICities
         return null;
     }
 
-    private function applyFilterByStateName(array $states): ?array
+    private function getByStateName(): ?array
     {
+        $states = $this->States->getAll();
         $state = array_filter($states, function($state) {
             return $state->nome === $this->filterStateName;
         });
@@ -183,8 +148,64 @@ class Cities implements ICities
         return null;
     }
 
+    public function filterById(array $cities): ?array
+    {
+        if (!$this->filterId) {
+            return $cities;
+        }
+        $citiesFiltered = array_filter($cities, function($citie) {
+            return $citie->id === $this->filterId;
+        });
+        return $citiesFiltered;
+    }
+
+    public function filterByName(array $cities): ?array
+    {
+        if (!$this->filterName) {
+            return $cities;
+        }
+        $citiesFiltered = array_filter($cities, function($citie) {
+            return $citie->nome === $this->filterName;
+        });
+        return $citiesFiltered;
+    }
+
+    public function filterByStateId(array $cities): ?array
+    {
+        if (!$this->filterStateId) {
+            return $cities;
+        }
+        $citiesFiltered = array_filter($cities, function($citie) {
+            return $citie->microrregiao->mesorregiao->UF->id === $this->filterStateId;
+        });
+        return $citiesFiltered;
+    }
+
+    public function filterByStateAbbreviation(array $cities): ?array
+    {
+        if (!$this->filterStateAbbreviation) {
+            return $cities;
+        }
+        $citiesFiltered = array_filter($cities, function($citie) {
+            return $citie->microrregiao->mesorregiao->UF->sigla === $this->filterStateAbbreviation;
+        });
+        return $citiesFiltered;
+    }
+
+    public function filterByStateName(array $cities): ?array
+    {
+        if (!$this->filterStateName) {
+            return $cities;
+        }
+        $citiesFiltered = array_filter($cities, function($citie) {
+            return $citie->microrregiao->mesorregiao->UF->nome === $this->filterStateName;
+        });
+        return $citiesFiltered;
+    }
+
     private function arrayToCollection(array $data): CitiesCollection
     {
+        $this->Cities = new CitiesCollection;
         foreach ($data as $item) {
             $State = new State(
                 $item->microrregiao->mesorregiao->UF->nome,

@@ -12,7 +12,7 @@ class Repositories implements IRepositories
 {
     public function getCities(): ICitiesRepository
     {
-        return new Cities(new StatesRepository);
+        return new Cities(new StatesRepository(new CountriesRepository));
     }
 
     public function getStates(): IStatesRepository
